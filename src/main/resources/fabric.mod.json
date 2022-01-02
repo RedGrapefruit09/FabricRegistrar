@@ -1,0 +1,30 @@
+{
+    "schemaVersion": 1,
+    "id": "fabricregistrar",
+    "version": "${version}",
+    "name": "Fabric Registrar",
+    "description": "Register your content with ease and no boilerplate. Fabric/Kotlin only!",
+    "authors": [
+        "RedGrapefruit09"
+    ],
+    "contact": {
+        "website": "https://redgrapefruit09.github.io",
+        "repo": "https://github.com/RedGrapefruit09/FabricRegistrar"
+    },
+    "license": "MIT",
+    "icon": "assets/fabricregistrar/icon.png",
+    "environment": "*",
+    "entrypoints": {
+        "main": [
+            {
+                "adapter": "kotlin",
+                "value": "com.redgrapefruit.fabricregistrar.MyInit"
+            }
+        ]
+    },
+    "depends": {
+        "fabricloader": ">=0.12.12",
+        "fabric": "*",
+        "minecraft": "1.18.1"
+    }
+}
