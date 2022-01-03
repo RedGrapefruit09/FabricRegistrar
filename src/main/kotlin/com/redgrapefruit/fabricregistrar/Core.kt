@@ -1,61 +1,8 @@
 package com.redgrapefruit.fabricregistrar
 
 import net.minecraft.util.Identifier
-import net.minecraft.util.registry.MutableRegistry
 import net.minecraft.util.registry.Registry
 import kotlin.reflect.KClass
-
-// Credits to https://github.com/DimensionalDevelopment/Matrix for being the inspiration for this project
-
-/**
- * A [RegistryProvider] is a wrapper around a method of registering content that uses [Identifier]s as keys.
- *
- * The main reason for doing this is that not all content is stored within a
- * standard [Registry], for example, `FabricModelPredicateProviderRegistry` and even some examples in vanilla
- * Minecraft code!
- *
- * [RegistryProvider] **doesn't use generics**, as that would make trouble with the _lovely_ `Any?` types in
- * Kotlin reflection, so you have to cast your types in an unsafe manner.
- *
- * **There are built-in [RegistryProvider]s** for standard [Registry]s and simple [MutableMap]s. Create them
- * with [forRegistry] and [forMap].
- *
- * You don't have to implement this interface to define a [RegistryProvider], if you're a fan of excessive
- * lambda usage (like me), you can use the [create] function.
- */
-interface RegistryProvider {
-    /**
-     * Register your [content] under a given [id]
-     */
-    fun register(id: Identifier, content: Any)
-
-    companion object {
-        /**
-         * Creates a [RegistryProvider] backed by a simple Kotlin [MutableMap]. Uses [MapRegistryProvider].
-         */
-        fun <T> forMap(map: MutableMap<Identifier, T>): RegistryProvider {
-            return MapRegistryProvider(map)
-        }
-
-        /**
-         * Creates a [RegistryProvider] backed by a standard Minecraft [Registry]. Uses [StandardRegistryProvider].
-         */
-        fun <T> forRegistry(map: Registry<T>): RegistryProvider {
-            if (map !is MutableRegistry) {
-                throw RuntimeException("Tried to obtain registry provider for an immutable registry!")
-            }
-
-            return StandardRegistryProvider(map)
-        }
-
-        /**
-         * Creates a custom [RegistryProvider] backed by a given lambda expression.
-         */
-        fun create(lambda: (id: Identifier, content: Any) -> Unit): RegistryProvider {
-            return LambdaRegistryProvider(lambda)
-        }
-    }
-}
 
 /**
  * Define a given class as a [Registrar], meaning it can be scanned to find

@@ -1,42 +1,11 @@
 package com.redgrapefruit.fabricregistrar
 
 import net.minecraft.util.Identifier
-import net.minecraft.util.registry.MutableRegistry
-import net.minecraft.util.registry.Registry
 import kotlin.reflect.KClass
 import kotlin.reflect.KVisibility
 import kotlin.reflect.full.declaredMemberProperties
 import kotlin.reflect.full.findAnnotation
 import kotlin.reflect.full.hasAnnotation
-
-/**
- * A [RegistryProvider] implementation backed by a lambda expression.
- */
-internal class LambdaRegistryProvider(private val impl: (id: Identifier, content: Any) -> Unit)
-    : RegistryProvider {
-
-    override fun register(id: Identifier, content: Any) {
-        impl(id, content)
-    }
-}
-
-/**
- * A [RegistryProvider] implementation backed by a standard Minecraft [Registry].
- */
-internal class StandardRegistryProvider<T>(private val registry: MutableRegistry<T>) : RegistryProvider {
-    override fun register(id: Identifier, content: Any) {
-        Registry.register(registry, id, content as T)
-    }
-}
-
-/**
- * A [RegistryProvider] implementation backed by a simple [MutableMap].
- */
-internal class MapRegistryProvider<T>(private val map: MutableMap<Identifier, T>) : RegistryProvider {
-    override fun register(id: Identifier, content: Any) {
-        map[id] = content as T
-    }
-}
 
 @PublishedApi internal fun runRegistry(clazz: KClass<*>, mode: DetectionMode, mod: String, provider: RegistryProvider) {
     // Initial checks
@@ -78,8 +47,11 @@ internal class MapRegistryProvider<T>(private val map: MutableMap<Identifier, T>
 
         // Registration
         val value = property.getter.call(clazz.objectInstance) ?: throw RegistrarExecutionException("${property.name}'s value is null!")
-        provider.register(Identifier(mod, finalName), value)
+        RegistryProvider.internalRegister(Identifier(mod, finalName), value, provider)
+        ObjectRegisterCallback.EVENT.invoker().onObjectRegistered(clazz, mode, mod, provider, property)
     }
+
+    RegistrarRegisterCallback.EVENT.invoker().onRegistrarRegistered(clazz, mode, mod, provider)
 }
 
 fun String.hasUppercase(): Boolean {
